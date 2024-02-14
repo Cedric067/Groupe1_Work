@@ -1,60 +1,36 @@
 library(shiny)
 
+# Définition de la variable liste_pays
 liste_pays <- c("Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Côte d'Ivoire", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini (Swaziland)", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Holy See", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar (Burma)", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia (formerly Macedonia)", "Norway", "Oman", "Pakistan", "Palau", "Palestine State", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe")
 
 # Définition de l'interface utilisateur
 ui <- fluidPage(
-  
-  # Titre de l'application
-  titlePanel("Application de Recettes"),
-  
-  # Première section : Introduction à l'application
-  mainPanel(
-    h4("Bienvenue dans notre application de recettes équilibrées!"),
-    p("Cette application vous permettra de découvrir des recettes adaptées à vos ingrédients disponibles dans votre frigo."),
-    p("Pour commencer, veuillez remplir les informations ci-dessous :")
-  ),
-  
-  # Deuxieme section : information users 
-  sidebarPanel(
-    # Sélection du sexe
-    radioButtons("sexe", "Sexe :", choices = c("M" = "Masculin", "F" = "Féminin")),
-    
-    # Zone de texte pour le nom
-    textInput("nom", "Nom:", placeholder = "Entrez votre nom"),
-    
-    # Zone de texte pour le prénom
-    textInput("prenom", "Prénom:", placeholder = "Entrez votre prénom"),
-    
-    # Champ numérique pour le poids
-    numericInput("poids", "Poids (en kg):", value = NULL, min = 10, max = 500, step = 0.1),
-    
-    # Curseur pour la taille
-    sliderInput("taille", "Taille (en mètres):", min = 0.5, max = 2.5, value = 1.7, step = 0.01),
-    
-    # Liste déroulante pour sélectionner le pays
-    selectInput("pays", "Pays :", choices = liste_pays),
-    
-    # Bouton pour calculer l'IMC
-    actionButton("calculer", "Calculer l'IMC")
-  ),
-  
-  # Afficher le résultat de l'IMC
-  mainPanel(
-    h3("Votre IMC est :"),
-    textOutput("resultat_imc"),
-    br(),
-    h4("Conseils :"),
-    textOutput("imcAdvice"),
-    
-    # Bouton pour la sélection de recette
-    actionButton("selection_recette", "Sélection de recette")
+  titlePanel("FOOD SAFETY - Informations"),
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("sexe", "Sexe :", choices = c("M" = "Masculin", "F" = "Féminin")),
+      textInput("nom", "Nom:", placeholder = "Entrez votre nom"),
+      textInput("prenom", "Prénom:", placeholder = "Entrez votre prénom"),
+      numericInput("poids", "Poids (en kg):", value = NULL, min = 10, max = 500, step = 0.1),
+      sliderInput("taille", "Taille (en mètres):", min = 0.5, max = 2.5, value = 1.7, step = 0.01),
+      selectInput("pays", "Pays :", choices = liste_pays),
+      actionButton("calculer", "Calculer l'IMC")
+    ),
+    mainPanel(
+      h3("Votre IMC est :"),
+      textOutput("resultat_imc"),
+      br(),
+      h4("Conseils :"),
+      fluidRow(
+        column(6, textOutput("imcAdvice")),
+        column(6, uiOutput("physique_image"))
+      )
+    )
   )
 )
 
-# Définition du serveur
+# Serveur de l'application
 server <- function(input, output) {
-  # Logique du serveur pour calculer l'IMC et afficher le résultat
   observeEvent(input$calculer, {
     poids <- input$poids
     taille <- input$taille
@@ -63,7 +39,6 @@ server <- function(input, output) {
       paste("Votre IMC est :", round(imc, 2))
     })
     
-    # Déterminer les conseils en fonction de la valeur de l'IMC et du sexe
     output$imcAdvice <- renderText({
       sexe <- ifelse(input$sexe == "M", "Mr", "Mme")
       if (imc < 18.5) {
@@ -91,14 +66,24 @@ Envisagez des interventions médicales ou chirurgicales si votre obésité est s
       }
       conseils
     })
-  })
-  
-  # Logique du serveur pour la sélection de recette
-  observeEvent(input$selection_recette, {
-    # Ajouter ici la logique pour la sélection de recette
-    # Cette partie sera développée en fonction des besoins spécifiques de votre application
+    
+    output$physique_image <- renderUI({
+      if (!is.null(input$calculer)) {
+        if (imc < 18.5) {
+          physique_img <- "souspoids.png"  # Nom de l'image correspondant au sous-poids
+        } else if (imc < 25) {
+          physique_img <- "normal.png"  # Nom de l'image correspondant au poids normal
+        } else if (imc < 30) {
+          physique_img <- "surpoids.png"  # Nom de l'image correspondant au surpoids
+        } else {
+          physique_img <- "obese.png"  # Nom de l'image correspondant à l'obésité
+        }
+        # Affichage de l'image
+        img(src = physique_img, height = 300, width = 150)
+      }
+    })
   })
 }
 
-# Exécution de l'application Shiny
+# Lancement de l'application Shiny
 shinyApp(ui = ui, server = server)
